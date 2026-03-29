@@ -25,9 +25,13 @@ export type RuleCondition = {
 export type RuleGroup = {
   id: string
   operator: LogicalOperator
-  rules: Array<RuleCondition | RuleGroup>
+  rules: RuleNode[]
 }
 
-export const isRuleGroup = (rule: RuleCondition | RuleGroup): rule is RuleGroup => {
+export type RuleNode = RuleCondition | RuleGroup
+
+export type RuleConditionPatch = Partial<Omit<RuleCondition, 'id'>>
+
+export const isRuleGroup = (rule: RuleNode): rule is RuleGroup => {
   return 'rules' in rule
 }
