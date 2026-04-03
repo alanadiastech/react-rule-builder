@@ -1,11 +1,18 @@
-import type { RuleConditionPatch, RuleGroup } from '../../types/rule'
+import type { RuleCondition, RuleConditionPatch, RuleGroup } from '../../types/rule'
 import { isRuleGroup } from '../../types/rule'
+import { createRuleCondition } from '../../utils/create-rule-condition'
 import { RuleConditionView } from './RuleConditionView'
+import {
+  getDefaultOperatorForField,
+  getDefaultValueForField,
+  logicalOperatorLabels,
+  ruleFieldDefinitions,
+} from './rule-builder.constants'
 
 type RuleGroupViewProps = {
   group: RuleGroup
   isRoot?: boolean
-  onAddCondition: (groupId: string) => void
+  onAddCondition: (groupId: string, condition?: RuleCondition) => void
   onAddGroup: (groupId: string) => void
   onRemoveRule: (ruleId: string) => void
   onSetGroupOperator: (groupId: string, operator: RuleGroup['operator']) => void
@@ -21,6 +28,7 @@ export const RuleGroupView = ({
   onSetGroupOperator,
   onUpdateCondition,
 }: RuleGroupViewProps) => {
+  const defaultField = ruleFieldDefinitions[0]
   const groupTitleId = `${group.id}-title`
   const groupDescriptionId = `${group.id}-description`
   const operatorSelectId = `${group.id}-logical-operator`
@@ -53,8 +61,8 @@ export const RuleGroupView = ({
               }}
               value={group.operator}
             >
-              <option value="and">E</option>
-              <option value="or">OU</option>
+              <option value="and">{logicalOperatorLabels.and}</option>
+              <option value="or">{logicalOperatorLabels.or}</option>
             </select>
           </div>
 
@@ -111,7 +119,14 @@ export const RuleGroupView = ({
           aria-label={`Adicionar condição ao grupo ${group.id}`}
           className="rule-button"
           onClick={() => {
-            onAddCondition(group.id)
+            onAddCondition(
+              group.id,
+              createRuleCondition({
+                field: defaultField.key,
+                operator: getDefaultOperatorForField(defaultField),
+                value: getDefaultValueForField(defaultField),
+              }),
+            )
           }}
           type="button"
         >

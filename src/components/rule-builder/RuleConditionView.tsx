@@ -1,21 +1,12 @@
 import type { RuleCondition, RuleConditionPatch } from '../../types/rule'
-
-const operatorOptions: Array<{
-  label: string
-  value: RuleCondition['operator']
-}> = [
-  { label: 'igual a', value: 'equals' },
-  { label: 'diferente de', value: 'not_equals' },
-  { label: 'contem', value: 'contains' },
-  { label: 'comeca com', value: 'starts_with' },
-  { label: 'termina com', value: 'ends_with' },
-  { label: 'maior que', value: 'greater_than' },
-  { label: 'maior ou igual a', value: 'greater_than_or_equal' },
-  { label: 'menor que', value: 'less_than' },
-  { label: 'menor ou igual a', value: 'less_than_or_equal' },
-  { label: 'esta em', value: 'in' },
-  { label: 'nao esta em', value: 'not_in' },
-]
+import {
+  booleanValueOptions,
+  comparisonOperatorLabels,
+  getDefaultOperatorForField,
+  getDefaultValueForField,
+  getRuleFieldDefinition,
+  ruleFieldDefinitions,
+} from './rule-builder.constants'
 
 type RuleConditionViewProps = {
   condition: RuleCondition
@@ -29,8 +20,16 @@ export const RuleConditionView = ({
   onUpdateCondition,
 }: RuleConditionViewProps) => {
   const fieldInputId = `${condition.id}-field`
+  const fieldDefinition =
+    getRuleFieldDefinition(condition.field) ?? ruleFieldDefinitions[0]
+  const operatorOptions = fieldDefinition.operators.map((operator) => ({
+    label: comparisonOperatorLabels[operator],
+    value: operator,
+  }))
   const operatorSelectId = `${condition.id}-operator`
   const valueInputId = `${condition.id}-value`
+  const valueAsString =
+    typeof condition.value === 'string' ? condition.value : String(condition.value)
 
   return (
     <div aria-label={`Condicao ${condition.id}`} className="rule-condition">
@@ -38,18 +37,30 @@ export const RuleConditionView = ({
         <label className="rule-label" htmlFor={fieldInputId}>
           Campo
         </label>
-        <input
-          className="rule-input"
+        <select
+          className="rule-select"
           id={fieldInputId}
           onChange={(event) => {
+            const nextField = getRuleFieldDefinition(event.target.value)
+
+            if (!nextField) {
+              return
+            }
+
             onUpdateCondition(condition.id, {
-              field: event.target.value,
+              field: nextField.key,
+              operator: getDefaultOperatorForField(nextField),
+              value: getDefaultValueForField(nextField),
             })
           }}
-          placeholder="Ex.: status"
-          type="text"
           value={condition.field}
-        />
+        >
+          {ruleFieldDefinitions.map((field) => (
+            <option key={field.key} value={field.key}>
+              {field.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="rule-field">
@@ -78,18 +89,73 @@ export const RuleConditionView = ({
         <label className="rule-label" htmlFor={valueInputId}>
           Valor
         </label>
-        <input
-          className="rule-input"
-          id={valueInputId}
-          onChange={(event) => {
-            onUpdateCondition(condition.id, {
-              value: event.target.value,
-            })
-          }}
-          placeholder="Ex.: ativo"
-          type="text"
-          value={String(condition.value)}
-        />
+        {fieldDefinition.type === 'enum' && (
+          <select
+            className="rule-select"
+            id={valueInputId}
+            onChange={(event) => {
+              onUpdateCondition(condition.id, {
+                value: event.target.value,
+              })
+            }}
+            value={valueAsString}
+          >
+            {fieldDefinition.options?.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {fieldDefinition.type === 'boolean' && (
+          <select
+            className="rule-select"
+            id={valueInputId}
+            onChange={(event) => {
+              onUpdateCondition(condition.id, {
+                value: event.target.value === 'true',
+              })
+            }}
+            value={valueAsString}
+          >
+            {booleanValueOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {fieldDefinition.type === 'number' && (
+          <input
+            className="rule-input"
+            id={valueInputId}
+            onChange={(event) => {
+              onUpdateCondition(condition.id, {
+                value: event.target.value === '' ? 0 : Number(event.target.value),
+              })
+            }}
+            step="any"
+            type="number"
+            value={typeof condition.value === 'number' ? condition.value : 0}
+          />
+        )}
+
+        {fieldDefinition.type === 'string' && (
+          <input
+            className="rule-input"
+            id={valueInputId}
+            onChange={(event) => {
+              onUpdateCondition(condition.id, {
+                value: event.target.value,
+              })
+            }}
+            placeholder="Ex.: Brasil"
+            type="text"
+            value={valueAsString}
+          />
+        )}
       </div>
 
       <button
