@@ -1,8 +1,8 @@
-import type { RuleConditionPatch, RuleGroup } from '../../types/rule'
+import type { RuleCondition, RuleConditionPatch, RuleGroup } from '../../types/rule'
 import { RuleGroupView } from './RuleGroupView'
 
 type RuleBuilderProps = {
-  onAddCondition: (groupId: string) => void
+  onAddCondition: (groupId: string, condition?: RuleCondition) => void
   onAddGroup: (groupId: string) => void
   onRemoveRule: (ruleId: string) => void
   onSetGroupOperator: (groupId: string, operator: RuleGroup['operator']) => void
