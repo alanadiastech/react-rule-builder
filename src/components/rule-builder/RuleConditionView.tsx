@@ -10,12 +10,14 @@ import {
 
 type RuleConditionViewProps = {
   condition: RuleCondition
+  errors?: string[]
   onRemoveRule: (ruleId: string) => void
   onUpdateCondition: (conditionId: string, patch: RuleConditionPatch) => void
 }
 
 export const RuleConditionView = ({
   condition,
+  errors = [],
   onRemoveRule,
   onUpdateCondition,
 }: RuleConditionViewProps) => {
@@ -28,6 +30,8 @@ export const RuleConditionView = ({
   }))
   const operatorSelectId = `${condition.id}-operator`
   const valueInputId = `${condition.id}-value`
+  const errorId = `${condition.id}-error`
+  const hasErrors = errors.length > 0
   const valueAsString =
     typeof condition.value === 'string' ? condition.value : String(condition.value)
 
@@ -38,6 +42,8 @@ export const RuleConditionView = ({
           Campo
         </label>
         <select
+          aria-describedby={hasErrors ? errorId : undefined}
+          aria-invalid={hasErrors}
           className="rule-select"
           id={fieldInputId}
           onChange={(event) => {
@@ -68,6 +74,8 @@ export const RuleConditionView = ({
           Operador
         </label>
         <select
+          aria-describedby={hasErrors ? errorId : undefined}
+          aria-invalid={hasErrors}
           className="rule-select"
           id={operatorSelectId}
           onChange={(event) => {
@@ -85,12 +93,14 @@ export const RuleConditionView = ({
         </select>
       </div>
 
-      <div className="rule-field">
+      <div className={hasErrors ? 'rule-field rule-field--with-error' : 'rule-field'}>
         <label className="rule-label" htmlFor={valueInputId}>
           Valor
         </label>
         {fieldDefinition.type === 'enum' && (
           <select
+            aria-describedby={hasErrors ? errorId : undefined}
+            aria-invalid={hasErrors}
             className="rule-select"
             id={valueInputId}
             onChange={(event) => {
@@ -110,6 +120,8 @@ export const RuleConditionView = ({
 
         {fieldDefinition.type === 'boolean' && (
           <select
+            aria-describedby={hasErrors ? errorId : undefined}
+            aria-invalid={hasErrors}
             className="rule-select"
             id={valueInputId}
             onChange={(event) => {
@@ -129,6 +141,8 @@ export const RuleConditionView = ({
 
         {fieldDefinition.type === 'number' && (
           <input
+            aria-describedby={hasErrors ? errorId : undefined}
+            aria-invalid={hasErrors}
             className="rule-input"
             id={valueInputId}
             onChange={(event) => {
@@ -144,6 +158,8 @@ export const RuleConditionView = ({
 
         {fieldDefinition.type === 'string' && (
           <input
+            aria-describedby={hasErrors ? errorId : undefined}
+            aria-invalid={hasErrors}
             className="rule-input"
             id={valueInputId}
             onChange={(event) => {
@@ -156,18 +172,26 @@ export const RuleConditionView = ({
             value={valueAsString}
           />
         )}
+
+        {hasErrors && (
+          <p className="rule-error" id={errorId} role="alert">
+            {errors.join(' ')}
+          </p>
+        )}
       </div>
 
-      <button
-        aria-label={`Remover condicao ${condition.id}`}
-        className="rule-button rule-button--danger"
-        onClick={() => {
-          onRemoveRule(condition.id)
-        }}
-        type="button"
-      >
-        Remover
-      </button>
+      <div className="rule-condition__actions">
+        <button
+          aria-label={`Remover condicao ${condition.id}`}
+          className="rule-button rule-button--danger"
+          onClick={() => {
+            onRemoveRule(condition.id)
+          }}
+          type="button"
+        >
+          Remover
+        </button>
+      </div>
     </div>
   )
 }
