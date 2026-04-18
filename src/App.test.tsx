@@ -19,7 +19,9 @@ describe('App', () => {
     fireEvent.click(screen.getByRole('button', { name: /Remover condicao/ }))
 
     expect(screen.getByText('Grupo aninhado')).not.toBeNull()
-    expect(document.body.textContent).toContain('"operator": "or"')
+    expect(
+      (screen.getAllByLabelText('Operador lógico')[0] as HTMLSelectElement).value,
+    ).toBe('or')
     expect(screen.queryByRole('button', { name: /Remover condicao/ })).toBeNull()
   })
 })

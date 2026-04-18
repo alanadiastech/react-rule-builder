@@ -71,6 +71,26 @@ select:focus-visible {
   margin-bottom: 32px;
 }
 
+.rule-builder__feedback {
+  margin: -12px 0 20px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  font-weight: 600;
+}
+
+.rule-builder__feedback--error {
+  border-color: rgba(255, 143, 143, 0.28);
+  color: #ffd1d1;
+  background: rgba(255, 143, 143, 0.08);
+}
+
+.rule-builder__feedback--success {
+  border-color: rgba(96, 196, 140, 0.22);
+  color: #cef2dd;
+  background: rgba(96, 196, 140, 0.08);
+}
+
 .rule-builder__eyebrow {
   margin: 0 0 14px;
   color: var(--accent);
@@ -99,6 +119,64 @@ select:focus-visible {
   border-radius: 22px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
+}
+
+.rule-summary__eyebrow {
+  margin: 0 0 8px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.rule-review-modal__content h2 {
+  margin: 0 0 10px;
+  font-family: var(--heading-font);
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.rule-summary__text {
+  margin: 0;
+  color: #dbe6ff;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.rule-review-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+}
+
+.rule-review-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 11, 24, 0.74);
+  backdrop-filter: blur(10px);
+}
+
+.rule-review-modal__content {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+  padding: 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(24, 33, 56, 0.98), rgba(17, 25, 45, 0.98));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+}
+
+.rule-review-modal__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 22px;
 }
 
 .rule-group__legend {
@@ -342,6 +420,10 @@ select:focus-visible {
   box-shadow: var(--shadow-soft);
 }
 
+.rule-preview--modal {
+  margin-top: 20px;
+}
+
 .rule-preview__summary {
   padding: 18px 24px;
   cursor: pointer;
@@ -417,5 +499,13 @@ select:focus-visible {
 
   .rule-button {
     width: 100%;
+  }
+
+  .rule-review-modal {
+    padding: 16px;
+  }
+
+  .rule-review-modal__actions {
+    flex-direction: column-reverse;
   }
 }
