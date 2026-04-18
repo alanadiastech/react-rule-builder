@@ -8,8 +8,10 @@ import {
   logicalOperatorLabels,
   ruleFieldDefinitions,
 } from './rule-builder.constants'
+import type { RuleValidationErrors } from './rule-builder.validation'
 
 type RuleGroupViewProps = {
+  conditionErrors: RuleValidationErrors
   group: RuleGroup
   isRoot?: boolean
   onAddCondition: (groupId: string, condition?: RuleCondition) => void
@@ -20,6 +22,7 @@ type RuleGroupViewProps = {
 }
 
 export const RuleGroupView = ({
+  conditionErrors,
   group,
   isRoot = false,
   onAddCondition,
@@ -29,9 +32,47 @@ export const RuleGroupView = ({
   onUpdateCondition,
 }: RuleGroupViewProps) => {
   const defaultField = ruleFieldDefinitions[0]
+  const conditionRules = group.rules.filter(
+    (rule): rule is RuleCondition => !isRuleGroup(rule),
+  )
   const groupTitleId = `${group.id}-title`
   const groupDescriptionId = `${group.id}-description`
+  const groupRules = group.rules.filter((rule) => isRuleGroup(rule))
   const operatorSelectId = `${group.id}-logical-operator`
+  const renderAddConditionButton = () => {
+    return (
+      <div className="rule-group__inline-actions">
+        <button
+          aria-label={`Adicionar condição ao grupo ${group.id}`}
+          className="rule-button"
+          onClick={() => {
+            onAddCondition(
+              group.id,
+              createRuleCondition({
+                field: defaultField.key,
+                operator: getDefaultOperatorForField(defaultField),
+                value: getDefaultValueForField(defaultField),
+              }),
+            )
+          }}
+          type="button"
+        >
+          Adicionar condição
+        </button>
+
+        <button
+          aria-label={`Adicionar grupo dentro de ${group.id}`}
+          className="rule-button rule-button--secondary"
+          onClick={() => {
+            onAddGroup(group.id)
+          }}
+          type="button"
+        >
+          Adicionar grupo
+        </button>
+      </div>
+    )
+  }
 
   return (
     <fieldset
@@ -83,67 +124,41 @@ export const RuleGroupView = ({
 
       <div className="rule-group__content">
         {group.rules.length === 0 && (
-          <div className="rule-group__empty">
-            Ainda nao ha regras. Adicione uma condição ou um grupo.
-          </div>
+          <>
+            <div className="rule-group__empty">
+              Ainda nao ha regras. Adicione uma condição ou um grupo.
+            </div>
+            {renderAddConditionButton()}
+          </>
         )}
 
-        {group.rules.map((rule) => {
-          if (isRuleGroup(rule)) {
-            return (
-              <RuleGroupView
-                group={rule}
-                key={rule.id}
-                onAddCondition={onAddCondition}
-                onAddGroup={onAddGroup}
-                onRemoveRule={onRemoveRule}
-                onSetGroupOperator={onSetGroupOperator}
-                onUpdateCondition={onUpdateCondition}
-              />
-            )
-          }
-
-          return (
+        {conditionRules.map((rule) => (
+          <div className="rule-group__item" key={rule.id}>
             <RuleConditionView
               condition={rule}
-              key={rule.id}
+              errors={conditionErrors[rule.id]}
               onRemoveRule={onRemoveRule}
               onUpdateCondition={onUpdateCondition}
             />
-          )
-        })}
+          </div>
+        ))}
+
+        {group.rules.length > 0 && renderAddConditionButton()}
+
+        {groupRules.map((rule) => (
+          <div className="rule-group__item" key={rule.id}>
+            <RuleGroupView
+              conditionErrors={conditionErrors}
+              group={rule}
+              onAddCondition={onAddCondition}
+              onAddGroup={onAddGroup}
+              onRemoveRule={onRemoveRule}
+              onSetGroupOperator={onSetGroupOperator}
+              onUpdateCondition={onUpdateCondition}
+            />
+          </div>
+        ))}
       </div>
-
-      <footer className="rule-group__actions">
-        <button
-          aria-label={`Adicionar condição ao grupo ${group.id}`}
-          className="rule-button"
-          onClick={() => {
-            onAddCondition(
-              group.id,
-              createRuleCondition({
-                field: defaultField.key,
-                operator: getDefaultOperatorForField(defaultField),
-                value: getDefaultValueForField(defaultField),
-              }),
-            )
-          }}
-          type="button"
-        >
-          Adicionar condição
-        </button>
-
-        <button
-          aria-label={`Adicionar grupo dentro de ${group.id}`}
-          className="rule-button rule-button--secondary"
-          onClick={() => {
-            onAddGroup(group.id)
-          }}
-          type="button"
-        >
-          Adicionar grupo
-        </button>
-      </footer>
     </fieldset>
   )
 }

@@ -1,5 +1,6 @@
 import type { RuleCondition, RuleConditionPatch, RuleGroup } from '../../types/rule'
 import { RuleGroupView } from './RuleGroupView'
+import { collectRuleValidationErrors } from './rule-builder.validation'
 
 type RuleBuilderProps = {
   onAddCondition: (groupId: string, condition?: RuleCondition) => void
@@ -18,6 +19,8 @@ export const RuleBuilder = ({
   onUpdateCondition,
   rootGroup,
 }: RuleBuilderProps) => {
+  const validationErrors = collectRuleValidationErrors(rootGroup)
+
   return (
     <section className="rule-builder">
       <div className="rule-builder__header">
@@ -28,6 +31,7 @@ export const RuleBuilder = ({
       </div>
 
       <RuleGroupView
+        conditionErrors={validationErrors}
         group={rootGroup}
         isRoot
         onAddCondition={onAddCondition}
@@ -36,6 +40,14 @@ export const RuleBuilder = ({
         onSetGroupOperator={onSetGroupOperator}
         onUpdateCondition={onUpdateCondition}
       />
+
+      <details className="rule-preview">
+        <summary className="rule-preview__summary">Ver JSON da regra</summary>
+
+        <pre className="rule-preview__code">
+          <code>{JSON.stringify(rootGroup, null, 2)}</code>
+        </pre>
+      </details>
     </section>
   )
 }
